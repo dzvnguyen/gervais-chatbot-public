@@ -103,7 +103,7 @@ Hours: Mon-Fri 9:30 AM - 7:30 PM, Sat 9:00 AM - 7:00 PM, Sun 12:00 PM - 6:00 PM`
                 bookingRequest = message;
                 addMessage('bot', "Confirmed. You can also book at https://gervaisnailmedspa.glossgenius.com/.");
             } else if (message === 'yes' && bookingRequest) {
-                addMessage('bot', "Confirmed. Your booking for: " + bookingRequest + " is set. Visit https://gervaisnailmedspa.glossgenius.com/ to confirm details. See you at 701 Gervais St., Suites 110 & 120!");
+                addMessage('bot', "Confirmed. Your booking for: " + bookingRequest + " is set. See you at 701 Gervais St., Suites 110 & 120!");
                 bookingRequest = null;
             } else {
                 // Check for price-related keywords
