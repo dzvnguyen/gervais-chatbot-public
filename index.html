@@ -8,7 +8,7 @@
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }
         #chatbox { width: 100%; max-width: 600px; margin: 0 auto; background: white; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); overflow: hidden; }
         #chat-messages { height: 400px; overflow-y: auto; padding: 10px; }
-        .message { margin: 10px 0; padding: 10px; border-radius: 5px; max-width: 70%; }
+        .message { margin: 10px 0; padding: 10px; border-radius: 5px; max-width: 70%; white-space: pre-wrap; }
         .user-message { background: #007bff; color: white; margin-left: 30%; }
         .bot-message { background: #e9ecef; color: black; margin-right: 30%; }
         #input-form { display: flex; padding: 10px; }
@@ -30,7 +30,7 @@
         const inputForm = document.getElementById('input-form');
         const currentTime = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true, day: 'numeric', month: 'long', year: 'numeric' });
 
-        // Service price dictionary based on your menu
+        // Service price dictionary based on your menu, with isolated waxing services
         const servicePrices = {
             'regular spa pedicure': 'REGULAR SPA Pedicure ………… $ 40 … $35 with student ID',
             'hot stone or callus treatment pedicure': 'HOT STONE OR CALLUS TREATMENT Pedicure … $ 40',
@@ -49,7 +49,10 @@
             'ombre dip': 'Ombre DIP … $ 60 +',
             'color powder': 'Color powder $ 45 +',
             'dip overlay': '*** DIP over lay $ 45 … Full set $ 50 +',
-            'eyebrows waxing': 'Eyebrows ………… $12, lips … $ 8 … chin $12 + … whole face $ 35+',
+            'eyebrows waxing': 'Eyebrows ………… $12',
+            'lips': 'lips … $ 8',
+            'chin': 'chin $12 +',
+            'whole face': 'whole face $ 35+',
             'underarms waxing': 'Underarms ……… $ 25 … FULL arms: $45 … HALF arms $35',
             'full legs waxing': 'Full legs: $55 … half legs: $45',
             'bikini waxing': 'Bikini: $ 35 / Brazilian: $ 60',
@@ -126,21 +129,50 @@
             } else {
                 // Check for specific service queries
                 let response = responses['default'];
-                const serviceKeywords = message.match(/\b(pedicure|manicure|gel powder|waxing|eyelashes)\b/i);
+                const serviceKeywords = message.match(/\b(pedicure|manicure|gel powder|waxing|eyelashes|regular|signature|luxury|deluxe|hot stone|callus|combo|student|full set|solar pink|ombre|color|dip|eyebrows|lips|chin|whole face|underarms|full legs|bikini|brazilian)\b/i);
                 if (serviceKeywords) {
                     const service = serviceKeywords[0].toLowerCase();
                     switch (service) {
                         case 'pedicure':
+                        case 'regular':
+                        case 'signature':
+                        case 'luxury':
+                        case 'deluxe':
+                        case 'hot stone':
+                        case 'callus':
+                        case 'combo':
+                        case 'student':
                             response = `Pedicure prices:\n${servicePrices['regular spa pedicure']}\n${servicePrices['hot stone or callus treatment pedicure']}\n${servicePrices['signature spa pedicure']}\n${servicePrices['luxury spa pedicure']}\n${servicePrices['deluxe spa pedicure']}\n${servicePrices['kids under 10 years old']}\n${servicePrices['combo regular pedi/mani']}\n${servicePrices['student pedicure + gel polish manicure']}\nReady to book? Let me know your time!`;
                             break;
                         case 'manicure':
                             response = `Manicure prices:\n${servicePrices['regular manicure']}\n${servicePrices['signature manicure']}\n${servicePrices['shellac/gel polish manicure']}\nReady to book? Let me know your time!`;
                             break;
                         case 'gel powder':
+                        case 'full set':
+                        case 'solar pink':
+                        case 'ombre':
+                        case 'color':
+                        case 'dip':
                             response = `Gel Powder prices:\n${servicePrices['full set gel powder']}\n${servicePrices['solar pink full set']}\n${servicePrices['ombre full set']}\n${servicePrices['ombre dip']}\n${servicePrices['color powder']}\n${servicePrices['dip overlay']}\nReady to book? Let me know your time!`;
                             break;
                         case 'waxing':
-                            response = `Waxing prices:\n${servicePrices['eyebrows waxing']}\n${servicePrices['underarms waxing']}\n${servicePrices['full legs waxing']}\n${servicePrices['bikini waxing']}\nReady to book? Let me know your time!`;
+                        case 'underarms':
+                        case 'full legs':
+                        case 'bikini':
+                        case 'brazilian':
+                            response = `Waxing prices:\n${servicePrices['underarms waxing']}\n${servicePrices['full legs waxing']}\n${servicePrices['bikini waxing']}\nReady to book? Let me know your time!`;
+                            break;
+                        case 'eyebrows':
+                            response = `Waxing price:\n${servicePrices['eyebrows waxing']}\nReady to book? Let me know your time!`;
+                            break;
+                        case 'lips':
+                            response = `Waxing price:\n${servicePrices['lips']}\nReady to book? Let me know your time!`;
+                            break;
+                        case 'chin':
+                            response = `Waxing price:\n${servicePrices['chin']}\nReady to book? Let me know your time!`;
+                            break;
+                        case 'whole face':
+                            response = `Waxing price:\n${servicePrices['whole face']}\nReady to book? Let me know your time!`;
                             break;
                         case 'eyelashes':
                             response = `Eyelashes prices:\n${servicePrices['eyelashes extension']}\nReady to book? Let me know your time!`;
