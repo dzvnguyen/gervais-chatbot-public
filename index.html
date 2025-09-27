@@ -30,49 +30,49 @@
         const inputForm = document.getElementById('input-form');
         const currentTime = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true, day: 'numeric', month: 'long', year: 'numeric' });
 
-        // Exact price menu from your provided text
-        const priceMenu = `GERVAIS NAIL & SPA
-701 GERVAIS ST., SUITES 110 & 120, Columbia, SC 29201
-(803) 851 - 3175. OPEN 7 DAYS A WEEK
-        PEDICURE (add gel polish $ 20)
- REGULAR SPA Pedicure ………… $ 40 … $35 with student ID
- HOT STONE OR CALLUS TREATMENT Pedicure … $ 40
- SIGNATURE SPA Pedicure ……… $45
- LUXURY SPA Pedicure ………… $ 55
- DELUXE SPA Pedicure ………… $65
-   ** kids under 10 years old $ 25
- *** COMBO: REGULAR PEDI/ MANI: $ 65
- ** for student … Pedicure + gel polish manicure: $ 75
-                  MANICURE
- REGULAR ………… $ 30 +
- SIGNATURE ……… $ 35 +
- SHELLAC / GEL POLISH Manicure: $ 40
-           GEL POWDER (different shape + $ 5)
- FULL SET ………… $ 50 + / FILL …………… $ 40 +
- *** cut down extra $5
- One nail fix/repair extra $5+
- SOLAR PINK: full set … $ 60 + / FILL … $ 45 +
-      Ombre full set … $ 60 + / FILL $45 +
-      Ombre DIP … $ 60 +
-   Color powder $ 45 +
- *** DIP over lay $ 45 … Full set $ 50 +
-       MISCELLANEOUS
- Plus additional $10+ for French tip NAIL or toenails
- polish change: toenail $ 20+ / gel polish $ 30 … finger $ 20+ / gel polish $ 30
- polish change for kid: finger or toe $10
- Nail design: $10+ … acrylic removal: $ 20+ … gel removal: $10 … dip removal $15
-      WAXING
- Eyebrows ………… $12, lips … $ 8 … chin $12 + … whole face $ 35+
- Underarms ……… $ 25 … FULL arms: $45 … HALF arms $35
- Full legs: $55 … half legs: $45
- Bikini: $ 35 / Brazilian: $ 60
-    Eyelashes extension: $ 50 / MINK INDIVIDUAL: $ 100 +
-        FREE PARKING IN BACK / walk-ins welcome
-Hours: Mon-Fri 9:30 AM - 7:30 PM, Sat 9:00 AM - 7:00 PM, Sun 12:00 PM - 6:00 PM`;
+        // Exact price menu from your provided text with explicit line breaks
+        const priceMenu = `GERVAIS NAIL & SPA\n` +
+                         `701 GERVAIS ST., SUITES 110 & 120, Columbia, SC 29201\n` +
+                         `(803) 851 - 3175. OPEN 7 DAYS A WEEK\n` +
+                         `        PEDICURE (add gel polish $ 20)\n` +
+                         ` REGULAR SPA Pedicure ………… $ 40 … $35 with student ID\n` +
+                         ` HOT STONE OR CALLUS TREATMENT Pedicure … $ 40\n` +
+                         ` SIGNATURE SPA Pedicure ……… $45\n` +
+                         ` LUXURY SPA Pedicure ………… $ 55\n` +
+                         ` DELUXE SPA Pedicure ………… $65\n` +
+                         `   ** kids under 10 years old $ 25\n` +
+                         ` *** COMBO: REGULAR PEDI/ MANI: $ 65\n` +
+                         `** for student … Pedicure + gel polish manicure: $ 75\n\n` +
+                         `                  MANICURE\n` +
+                         ` REGULAR ………… $ 30 +\n` +
+                         ` SIGNATURE ……… $ 35 +\n` +
+                         ` SHELLAC / GEL POLISH Manicure: $ 40\n\n` +
+                         `           GEL POWDER (different shape + $ 5)\n` +
+                         ` FULL SET ………… $ 50 + / FILL …………… $ 40 +\n` +
+                         ` *** cut down extra $5\n` +
+                         ` One nail fix/repair extra $5+\n` +
+                         ` SOLAR PINK: full set … $ 60 + / FILL … $ 45 +\n` +
+                         `      Ombre full set … $ 60 + / FILL $45 +\n` +
+                         `      Ombre DIP … $ 60 +\n` +
+                         `   Color powder $ 45 +\n` +
+                         ` *** DIP over lay $ 45 … Full set $ 50 +\n\n` +
+                         `       MISCELLANEOUS\n` +
+                         ` Plus additional $10+ for French tip NAIL or toenails\n` +
+                         ` polish change: toenail $ 20+ / gel polish $ 30 … finger $ 20+ / gel polish $ 30\n` +
+                         ` polish change for kid: finger or toe $10\n` +
+                         ` Nail design: $10+ … acrylic removal: $ 20+ … gel removal: $10 … dip removal $15\n\n` +
+                         `      WAXING\n` +
+                         ` Eyebrows ………… $12, lips … $ 8 … chin $12 + … whole face $ 35+\n` +
+                         ` Underarms ……… $ 25 … FULL arms: $45 … HALF arms $35\n` +
+                         ` Full legs: $55 … half legs: $45\n` +
+                         ` Bikini: $ 35 / Brazilian: $ 60\n\n` +
+                         `    Eyelashes extension: $ 50 / MINK INDIVIDUAL: $ 100 +\n\n` +
+                         `        FREE PARKING IN BACK / walk-ins welcome\n\n` +
+                         `Hours: Mon-Fri 9:30 AM - 7:30 PM, Sat 9:00 AM - 7:00 PM, Sun 12:00 PM - 6:00 PM`;
 
         // Predefined responses
         const responses = {
-            'hello': "Hi! Welcome to Gervais Nail & Spa. I’m located at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. How can I assist you today?",
+            'hello': "Hi! Welcome to Gervais Nail & Spa. I’m located at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Chat with us at https://dznguyen.github.io/gervais-chatbot-public/. How can I assist you today?",
             'address': "We’re at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Free parking in the back!",
             'phone': "Our phone number is 803-851-3175. Feel free to call us!",
             'hours': `We’re open Mon-Fri: 9:30 AM - 7:30 PM, Sat: 9:00 AM - 7:00 PM, Sun: 12:00 PM - 6:00 PM. It’s currently ${currentTime} EDT, and we’re open until 7:00 PM today!`,
@@ -121,7 +121,7 @@ Hours: Mon-Fri 9:30 AM - 7:30 PM, Sat 9:00 AM - 7:00 PM, Sun 12:00 PM - 6:00 PM`
         }
 
         // Initial welcome message
-        addMessage('bot', `Hi! I’m the Gervais Nail & Spa chatbot. It’s ${currentTime} EDT, and we’re open until 7:00 PM today at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. How can I help?`);
+        addMessage('bot', `Hi! I’m the Gervais Nail & Spa chatbot. It’s ${currentTime} EDT, and we’re open until 7:00 PM today at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Chat with us at https://dznguyen.github.io/gervais-chatbot-public/. How can I assist you today?`);
     </script>
 </body>
 </html>
