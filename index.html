@@ -30,7 +30,33 @@
         const inputForm = document.getElementById('input-form');
         const currentTime = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true, day: 'numeric', month: 'long', year: 'numeric' });
 
-        // Exact price menu from your provided text with explicit line breaks
+        // Service price dictionary based on your menu
+        const servicePrices = {
+            'regular spa pedicure': 'REGULAR SPA Pedicure ………… $ 40 … $35 with student ID',
+            'hot stone or callus treatment pedicure': 'HOT STONE OR CALLUS TREATMENT Pedicure … $ 40',
+            'signature spa pedicure': 'SIGNATURE SPA Pedicure ……… $45',
+            'luxury spa pedicure': 'LUXURY SPA Pedicure ………… $ 55',
+            'deluxe spa pedicure': 'DELUXE SPA Pedicure ………… $65',
+            'kids under 10 years old': '** kids under 10 years old $ 25',
+            'combo regular pedi/mani': '*** COMBO: REGULAR PEDI/ MANI: $ 65',
+            'student pedicure + gel polish manicure': '** for student … Pedicure + gel polish manicure: $ 75',
+            'regular manicure': 'REGULAR ………… $ 30 +',
+            'signature manicure': 'SIGNATURE ……… $ 35 +',
+            'shellac/gel polish manicure': 'SHELLAC / GEL POLISH Manicure: $ 40',
+            'full set gel powder': 'FULL SET ………… $ 50 + / FILL …………… $ 40 +',
+            'solar pink full set': 'SOLAR PINK: full set … $ 60 + / FILL … $ 45 +',
+            'ombre full set': 'Ombre full set … $ 60 + / FILL $45 +',
+            'ombre dip': 'Ombre DIP … $ 60 +',
+            'color powder': 'Color powder $ 45 +',
+            'dip overlay': '*** DIP over lay $ 45 … Full set $ 50 +',
+            'eyebrows waxing': 'Eyebrows ………… $12, lips … $ 8 … chin $12 + … whole face $ 35+',
+            'underarms waxing': 'Underarms ……… $ 25 … FULL arms: $45 … HALF arms $35',
+            'full legs waxing': 'Full legs: $55 … half legs: $45',
+            'bikini waxing': 'Bikini: $ 35 / Brazilian: $ 60',
+            'eyelashes extension': 'Eyelashes extension: $ 50 / MINK INDIVIDUAL: $ 100 +'
+        };
+
+        // Full price menu for fallback
         const priceMenu = `GERVAIS NAIL & SPA\n` +
                          `701 GERVAIS ST., SUITES 110 & 120, Columbia, SC 29201\n` +
                          `(803) 851 - 3175. OPEN 7 DAYS A WEEK\n` +
@@ -98,16 +124,35 @@
                 addMessage('bot', "Confirmed. You can also book at https://gervaisnailmedspa.glossgenius.com/ See you at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201.");
                 bookingRequest = null;
             } else {
-                // Check for price-related keywords
-                let responseKey = 'default';
-                if (message.includes('price') || message.includes('cost') || message.includes('how much') || message.includes('menu')) {
-                    responseKey = 'price';
+                // Check for specific service queries
+                let response = responses['default'];
+                const serviceKeywords = message.match(/\b(pedicure|manicure|gel powder|waxing|eyelashes)\b/i);
+                if (serviceKeywords) {
+                    const service = serviceKeywords[0].toLowerCase();
+                    switch (service) {
+                        case 'pedicure':
+                            response = `Pedicure prices:\n${servicePrices['regular spa pedicure']}\n${servicePrices['hot stone or callus treatment pedicure']}\n${servicePrices['signature spa pedicure']}\n${servicePrices['luxury spa pedicure']}\n${servicePrices['deluxe spa pedicure']}\n${servicePrices['kids under 10 years old']}\n${servicePrices['combo regular pedi/mani']}\n${servicePrices['student pedicure + gel polish manicure']}\nReady to book? Let me know your time!`;
+                            break;
+                        case 'manicure':
+                            response = `Manicure prices:\n${servicePrices['regular manicure']}\n${servicePrices['signature manicure']}\n${servicePrices['shellac/gel polish manicure']}\nReady to book? Let me know your time!`;
+                            break;
+                        case 'gel powder':
+                            response = `Gel Powder prices:\n${servicePrices['full set gel powder']}\n${servicePrices['solar pink full set']}\n${servicePrices['ombre full set']}\n${servicePrices['ombre dip']}\n${servicePrices['color powder']}\n${servicePrices['dip overlay']}\nReady to book? Let me know your time!`;
+                            break;
+                        case 'waxing':
+                            response = `Waxing prices:\n${servicePrices['eyebrows waxing']}\n${servicePrices['underarms waxing']}\n${servicePrices['full legs waxing']}\n${servicePrices['bikini waxing']}\nReady to book? Let me know your time!`;
+                            break;
+                        case 'eyelashes':
+                            response = `Eyelashes prices:\n${servicePrices['eyelashes extension']}\nReady to book? Let me know your time!`;
+                            break;
+                    }
+                } else if (message.includes('price') || message.includes('cost') || message.includes('how much') || message.includes('menu')) {
+                    response = responses['price'];
                 } else if (message.includes('address') || message.includes('where') || message.includes('location')) {
-                    responseKey = 'address';
+                    response = responses['address'];
                 } else {
-                    responseKey = Object.keys(responses).find(key => message.includes(key)) || 'default';
+                    response = responses[Object.keys(responses).find(key => message.includes(key)) || 'default'];
                 }
-                const response = responses[responseKey];
                 addMessage('bot', response);
             }
         });
