@@ -80,13 +80,13 @@ Hours: Mon-Fri 9:30 AM - 7:30 PM, Sat 9:00 AM - 7:00 PM, Sun 12:00 PM - 6:00 PM`
 
         // Predefined responses
         const responses = {
-            'hello': "Hi! Welcome to Gervais Nail & Spa. How can I assist you today?",
+            'hello': "Hi! Welcome to Gervais Nail & Spa. I’m located at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. How can I assist you today?",
             'address': "We’re at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Free parking in the back!",
             'phone': "Our phone number is 803-851-3175. Feel free to call us!",
             'hours': `We’re open Mon-Fri: 9:30 AM - 7:30 PM, Sat: 9:00 AM - 7:00 PM, Sun: 12:00 PM - 6:00 PM. It’s currently ${currentTime} EDT, and we’re open until 7:00 PM today!`,
             'price': `Here’s our full price menu from your latest text:\n\n${priceMenu}\n\nReady to book? Let me know your service and time!`,
             'book': "Great! Please tell me the service and time (e.g., 'Signature SPA Pedicure at 2 PM tomorrow'), and I’ll confirm.",
-            'default': "Sorry, I didn’t get that. Try asking about hours, booking, or type 'price' for our menu. Call 803-851-3175 for more help."
+            'default': "Sorry, I didn’t get that. Try asking about hours, address, booking, or type 'price' for our menu. Call 803-851-3175 for more help."
         };
 
         // Booking tracking
@@ -101,7 +101,7 @@ Hours: Mon-Fri 9:30 AM - 7:30 PM, Sat 9:00 AM - 7:00 PM, Sun 12:00 PM - 6:00 PM`
             // Handle booking requests
             if (message.includes('book') || message.includes('schedule')) {
                 bookingRequest = message;
-                addMessage('bot', "Confirmed. Please book at https://gervaisnailmedspa.glossgenius.com/ to finalize your appointment for: " + message);
+                addMessage('bot', "Confirmed. You can also book at https://gervaisnailmedspa.glossgenius.com/.");
             } else if (message === 'yes' && bookingRequest) {
                 addMessage('bot', "Confirmed. Your booking for: " + bookingRequest + " is set. Visit https://gervaisnailmedspa.glossgenius.com/ to confirm details. See you at 701 Gervais St., Suites 110 & 120!");
                 bookingRequest = null;
@@ -110,6 +110,8 @@ Hours: Mon-Fri 9:30 AM - 7:30 PM, Sat 9:00 AM - 7:00 PM, Sun 12:00 PM - 6:00 PM`
                 let responseKey = 'default';
                 if (message.includes('price') || message.includes('cost') || message.includes('how much') || message.includes('menu')) {
                     responseKey = 'price';
+                } else if (message.includes('address') || message.includes('where') || message.includes('location')) {
+                    responseKey = 'address';
                 } else {
                     responseKey = Object.keys(responses).find(key => message.includes(key)) || 'default';
                 }
@@ -127,7 +129,7 @@ Hours: Mon-Fri 9:30 AM - 7:30 PM, Sat 9:00 AM - 7:00 PM, Sun 12:00 PM - 6:00 PM`
         }
 
         // Initial welcome message
-        addMessage('bot', `Hi! I’m the Gervais Nail & Spa chatbot. It’s ${currentTime} EDT, and we’re open until 7:00 PM today. How can I help?`);
+        addMessage('bot', `Hi! I’m the Gervais Nail & Spa chatbot. It’s ${currentTime} EDT, and we’re open until 7:00 PM today at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. How can I help?`);
     </script>
 </body>
 </html>
