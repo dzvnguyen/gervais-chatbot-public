@@ -121,10 +121,10 @@
             'address': `We’re at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Free parking in the back, ${userName}!`,
             'phone': `Our phone number is 803-851-3175. Feel free to call us, ${userName}!`,
             'hours': `We’re open Mon-Fri: 9:30 AM - 7:30 PM, Sat: 9:00 AM - 7:00 PM, Sun: 12:00 PM - 6:00 PM. It’s currently ${currentTime} EDT, and we’re open until 7:00 PM today, ${userName}!`,
-            'price': `Here’s our full price menu from your latest text, ${userName}:\n\n${priceMenu}\n\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`,
+            'price': `Here’s our full price menu from your latest text, ${userName}:\n\n${priceMenu}\n\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`,
             'book': `Confirmed ${userName}! See you then. 💅✨`,
             'human': `Thanks ${userName}! Please call 803-851-3175 or DM us on Instagram for live assistance. 😊 We’re here to help!`,
-            'default': `Sorry ${userName}, I didn’t get that. Please tell me your name (or type 'skip' to continue as guest) or try asking about hours, address, booking, or type 'price' for our menu. Type 'human' for live help, or call 803-851-3175.`
+            'default': `Sorry ${userName}, I didn’t get that. Please tell me your name (or type 'skip' to continue as guest) or try asking about hours, address, booking, or type 'price' for our menu. Book now or call 803-851-3175 to confirm, and type 'human' for live help.`
         };
 
         // Booking tracking
@@ -248,11 +248,11 @@
                         case 'callus':
                         case 'combo':
                         case 'student':
-                            response = `Pedicure prices ${userName}:\n${servicePrices['regular spa pedicure']}\n${servicePrices['hot stone or callus treatment pedicure']}\n${servicePrices['signature spa pedicure']}\n${servicePrices['luxury spa pedicure']}\n${servicePrices['deluxe spa pedicure']}\n${servicePrices['kids under 10 years old']}\n${servicePrices['combo regular pedi/mani']}\n${servicePrices['student pedicure + gel polish manicure']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Pedicure prices ${userName}:\n${servicePrices['regular spa pedicure']}\n${servicePrices['hot stone or callus treatment pedicure']}\n${servicePrices['signature spa pedicure']}\n${servicePrices['luxury spa pedicure']}\n${servicePrices['deluxe spa pedicure']}\n${servicePrices['kids under 10 years old']}\n${servicePrices['combo regular pedi/mani']}\n${servicePrices['student pedicure + gel polish manicure']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Pedicure');
                             break;
                         case 'manicure':
-                            response = `Manicure prices ${userName}:\n${servicePrices['regular manicure']}\n${servicePrices['signature manicure']}\n${servicePrices['shellac/gel polish manicure']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Manicure prices ${userName}:\n${servicePrices['regular manicure']}\n${servicePrices['signature manicure']}\n${servicePrices['shellac/gel polish manicure']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Manicure');
                             break;
                         case 'gel powder':
@@ -261,7 +261,7 @@
                         case 'ombre':
                         case 'color':
                         case 'dip':
-                            response = `Gel Powder prices ${userName}:\n${servicePrices['full set gel powder']}\n${servicePrices['solar pink full set']}\n${servicePrices['ombre full set']}\n${servicePrices['ombre dip']}\n${servicePrices['color powder']}\n${servicePrices['dip overlay']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Gel Powder prices ${userName}:\n${servicePrices['full set gel powder']}\n${servicePrices['solar pink full set']}\n${servicePrices['ombre full set']}\n${servicePrices['ombre dip']}\n${servicePrices['color powder']}\n${servicePrices['dip overlay']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Gel Powder');
                             break;
                         case 'waxing':
@@ -271,28 +271,28 @@
                         case 'brazilian':
                         case 'how much wax':
                         case 'wax price':
-                            response = `Waxing prices ${userName}:\n${servicePrices['underarms waxing']}\n${servicePrices['full legs waxing']}\n${servicePrices['bikini waxing']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Waxing prices ${userName}:\n${servicePrices['underarms waxing']}\n${servicePrices['full legs waxing']}\n${servicePrices['bikini waxing']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Waxing');
                             break;
                         case 'eyebrows':
                         case 'eyebrow wax':
-                            response = `Waxing price ${userName}:\n${servicePrices['eyebrows waxing']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Waxing price ${userName}:\n${servicePrices['eyebrows waxing']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Eyebrows');
                             break;
                         case 'lips':
                         case 'lip wax':
-                            response = `Waxing price ${userName}:\n${servicePrices['lips']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Waxing price ${userName}:\n${servicePrices['lips']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Lips');
                             break;
                         case 'chin':
-                            response = `Waxing price ${userName}:\n${servicePrices['chin']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Waxing price ${userName}:\n${servicePrices['chin']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             break;
                         case 'whole face':
-                            response = `Waxing price ${userName}:\n${servicePrices['whole face']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Waxing price ${userName}:\n${servicePrices['whole face']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Whole Face');
                             break;
                         case 'eyelashes':
-                            response = `Eyelashes prices ${userName}:\n${servicePrices['eyelashes extension']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Eyelashes prices ${userName}:\n${servicePrices['eyelashes extension']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Eyelashes');
                             break;
                     }
