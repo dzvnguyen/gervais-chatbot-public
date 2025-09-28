@@ -160,6 +160,8 @@
             recognition.onresult = (event) => {
                 const speechResult = event.results[0][0].transcript.toLowerCase().trim();
                 addMessage('user', speechResult);
+                // Debug log to check transcription
+                console.log('Transcribed:', speechResult);
                 simulateSubmit(speechResult);
                 trackEvent('Chatbot', 'Voice Query', speechResult);
             };
@@ -175,8 +177,11 @@
         }
 
         function simulateSubmit(message) {
-            inputForm.dispatchEvent(new Event('submit'));
-            userInput.value = message; // Set input for analytics tracking
+            // Ensure message is processed as a valid input
+            if (message) {
+                inputForm.dispatchEvent(new Event('submit'));
+                userInput.value = message; // Set for analytics and processing
+            }
         }
 
         voiceBtn.addEventListener('click', () => {
@@ -206,7 +211,7 @@
                     return;
                 }
                 const nameMatch = message.match(/^[a-z]+/i);
-                if (nameMatch && !message.includes('price') && !message.includes('book') && !message.match(/\b(pedicure|manicure|gel powder|waxing|eyelashes|regular|signature|luxury|deluxe|hot stone|callus|combo|student|full set|solar pink|ombre|color|dip|eyebrows|lips|chin|whole face|underarms|full legs|bikini|brazilian)\b/i)) {
+                if (nameMatch && !message.includes('price') && !message.includes('book') && !message.match(/\b(pedicure|manicure|gel powder|waxing|eyelashes|regular|signature|luxury|deluxe|hot stone|callus|combo|student|full set|solar pink|ombre|color|dip|eyebrows|lips|chin|whole face|underarms|full legs|bikini|brazilian|human)\b/i)) {
                     userName = nameMatch[0];
                     addMessage('bot', `Nice to meet you, ${userName}! I'm the Gervais Nail & Spa chatbot. How can I assist you today?`);
                     trackEvent('Chatbot', 'Name Provided', userName);
@@ -229,8 +234,9 @@
             } else {
                 // Check for specific service queries with enhanced keywords
                 let response = responses['default'];
-                const serviceKeywords = message.match(/\b(pedicure|manicure|gel powder|waxing|eyelashes|regular|signature|luxury|deluxe|hot stone|callus|combo|student|full set|solar pink|ombre|color|dip|eyebrows|lips|chin|whole face|underarms|full legs|bikini|brazilian|wax price|how much wax|eyebrow wax|lip wax|price|how much|cost)\b/i);
+                const serviceKeywords = message.match(/\b(pedicure|manicure|gel powder|waxing|eyelashes|regular|signature|luxury|deluxe|hot stone|callus|combo|student|full set|solar pink|ombre|color|dip|eyebrows|lips|chin|whole face|underarms|full legs|bikini|brazilian|wax price|how much wax|eyebrow wax|lip wax)\b/i);
                 if (serviceKeywords) {
+                    console.log('Matched service:', serviceKeywords[0]); // Debug log
                     const service = serviceKeywords[0].toLowerCase();
                     switch (service) {
                         case 'pedicure':
@@ -289,13 +295,10 @@
                             response = `Eyelashes prices ${userName}:\n${servicePrices['eyelashes extension']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Eyelashes');
                             break;
-                        case 'price':
-                        case 'how much':
-                        case 'cost':
-                            response = responses['price'];
-                            trackEvent('Chatbot', 'Price Menu Request', 'Full Menu');
-                            break;
                     }
+                } else if (message.includes('price') || message.includes('how much') || message.includes('cost')) {
+                    response = responses['price'];
+                    trackEvent('Chatbot', 'Price Menu Request', 'Full Menu');
                 } else if (message.includes('address') || message.includes('where') || message.includes('location')) {
                     response = responses['address'];
                     trackEvent('Chatbot', 'Address Request', 'Location');
