@@ -211,10 +211,17 @@
                     return;
                 }
                 const nameMatch = message.match(/^[a-z]+/i);
-                if (nameMatch && !message.includes('price') && !message.includes('book') && !message.match(/\b(pedicure|manicure|gel powder|waxing|eyelashes|regular|signature|luxury|deluxe|hot stone|callus|combo|student|full set|solar pink|ombre|color|dip|eyebrows|lips|chin|whole face|underarms|full legs|bikini|brazilian|human)\b/i)) {
+                if (nameMatch) {
                     userName = nameMatch[0];
+                    console.log('Detected name:', userName); // Debug log
                     addMessage('bot', `Nice to meet you, ${userName}! I'm the Gervais Nail & Spa chatbot. How can I assist you today?`);
                     trackEvent('Chatbot', 'Name Provided', userName);
+                    // Reprocess the remaining message if it contains a query
+                    const remainingMessage = message.replace(nameMatch[0], '').trim();
+                    if (remainingMessage) {
+                        userInput.value = remainingMessage;
+                        inputForm.dispatchEvent(new Event('submit'));
+                    }
                     return;
                 }
             }
