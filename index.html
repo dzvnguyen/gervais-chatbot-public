@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gervais Nail & Spa Chatbot</title>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WW6SVZXP3Y"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-WW6SVZXP3Y');
+    </script>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }
         #chatbox { width: 100%; max-width: 600px; margin: 0 auto; background: white; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); overflow: hidden; }
@@ -11,107 +19,173 @@
         .message { margin: 10px 0; padding: 10px; border-radius: 5px; max-width: 70%; white-space: pre-wrap; }
         .user-message { background: #007bff; color: white; margin-left: 30%; }
         .bot-message { background: #e9ecef; color: black; margin-right: 30%; }
-        #input-form { display: flex; padding: 10px; }
+        #input-form { display: flex; padding: 10px; align-items: center; }
         #user-input { flex: 1; padding: 5px; border: 1px solid #ddd; border-radius: 5px 0 0 5px; }
         #send-btn { padding: 5px 10px; border: 1px solid #007bff; border-left: none; border-radius: 0 5px 5px 0; background: #007bff; color: white; cursor: pointer; }
+        #voice-btn { padding: 5px 10px; margin-left: 5px; background: #ff4444; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .voice-active { background: #ff6666; }
     </style>
 </head>
 <body>
     <div id="chatbox">
         <div id="chat-messages"></div>
         <form id="input-form">
-            <input type="text" id="user-input" placeholder="Type your message...">
+            <input type="text" id="user-input" placeholder="Type your name or a question...">
             <button type="submit" id="send-btn">Send</button>
+            <button type="button" id="voice-btn">🎙️ Voice</button>
         </form>
     </div>
     <script>
         const chatMessages = document.getElementById('chat-messages');
         const userInput = document.getElementById('user-input');
         const inputForm = document.getElementById('input-form');
+        const voiceBtn = document.getElementById('voice-btn');
+        let userName = 'friend'; // Default name, updated by first message
+        let namePrompted = false; // Track if name prompt has been sent
+        let recognition = null; // Speech recognition instance
+
         const currentTime = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true, day: 'numeric', month: 'long', year: 'numeric' });
 
-        // Service price dictionary based on your menu, with isolated waxing services
+        // Service price dictionary based on your menu
         const servicePrices = {
-            'regular spa pedicure': 'REGULAR SPA Pedicure ………… $ 40 … $35 with student ID',
-            'hot stone or callus treatment pedicure': 'HOT STONE OR CALLUS TREATMENT Pedicure … $ 40',
-            'signature spa pedicure': 'SIGNATURE SPA Pedicure ……… $45',
-            'luxury spa pedicure': 'LUXURY SPA Pedicure ………… $ 55',
-            'deluxe spa pedicure': 'DELUXE SPA Pedicure ………… $65',
-            'kids under 10 years old': '** kids under 10 years old $ 25',
-            'combo regular pedi/mani': '*** COMBO: REGULAR PEDI/ MANI: $ 65',
-            'student pedicure + gel polish manicure': '** for student … Pedicure + gel polish manicure: $ 75',
-            'regular manicure': 'REGULAR ………… $ 30 +',
-            'signature manicure': 'SIGNATURE ……… $ 35 +',
-            'shellac/gel polish manicure': 'SHELLAC / GEL POLISH Manicure: $ 40',
-            'full set gel powder': 'FULL SET ………… $ 50 + / FILL …………… $ 40 +',
-            'solar pink full set': 'SOLAR PINK: full set … $ 60 + / FILL … $ 45 +',
-            'ombre full set': 'Ombre full set … $ 60 + / FILL $45 +',
-            'ombre dip': 'Ombre DIP … $ 60 +',
-            'color powder': 'Color powder $ 45 +',
-            'dip overlay': '*** DIP over lay $ 45 … Full set $ 50 +',
-            'eyebrows waxing': 'Eyebrows ………… $12',
-            'lips': 'lips … $ 8',
-            'chin': 'chin $12 +',
-            'whole face': 'whole face $ 35+',
-            'underarms waxing': 'Underarms ……… $ 25 … FULL arms: $45 … HALF arms $35',
-            'full legs waxing': 'Full legs: $55 … half legs: $45',
-            'bikini waxing': 'Bikini: $ 35 / Brazilian: $ 60',
-            'eyelashes extension': 'Eyelashes extension: $ 50 / MINK INDIVIDUAL: $ 100 +'
+            'regular spa pedicure': 'REGULAR SPA Pedicure 💅 ………… $ 40 … $35 with student ID',
+            'hot stone or callus treatment pedicure': 'HOT STONE OR CALLUS TREATMENT Pedicure 🌊 … $ 40',
+            'signature spa pedicure': 'SIGNATURE SPA Pedicure ✨ ……… $45',
+            'luxury spa pedicure': 'LUXURY SPA Pedicure 💎 ………… $ 55',
+            'deluxe spa pedicure': 'DELUXE SPA Pedicure 🌟 ………… $65',
+            'kids under 10 years old': '** kids under 10 years old 👶 $ 25',
+            'combo regular pedi/mani': '*** COMBO: REGULAR PEDI/ MANI 💆‍♀️ $ 65',
+            'student pedicure + gel polish manicure': '** for student 🎓 … Pedicure + gel polish manicure: $ 75',
+            'regular manicure': 'REGULAR ………… $ 30 + 💅',
+            'signature manicure': 'SIGNATURE ……… $ 35 + ✨',
+            'shellac/gel polish manicure': 'SHELLAC / GEL POLISH Manicure 💎 $ 40',
+            'full set gel powder': 'FULL SET ………… $ 50 + / FILL …………… $ 40 + 🌟',
+            'solar pink full set': 'SOLAR PINK: full set … $ 60 + / FILL … $ 45 + 🌞',
+            'ombre full set': 'Ombre full set … $ 60 + / FILL $45 + 🎨',
+            'ombre dip': 'Ombre DIP … $ 60 + 🎨',
+            'color powder': 'Color powder $ 45 + 🌈',
+            'dip overlay': '*** DIP over lay $ 45 … Full set $ 50 + 🌟',
+            'eyebrows waxing': 'Eyebrows ………… $12 ✂️',
+            'lips': 'lips … $ 8 💋',
+            'chin': 'chin $12 + ✂️',
+            'whole face': 'whole face $ 35+ ✨',
+            'underarms waxing': 'Underarms ……… $ 25 … FULL arms: $45 … HALF arms $35 ✂️',
+            'full legs waxing': 'Full legs: $55 … half legs: $45 🌿',
+            'bikini waxing': 'Bikini: $ 35 / Brazilian: $ 60 🌺',
+            'eyelashes extension': 'Eyelashes extension: $ 50 / MINK INDIVIDUAL: $ 100 + 👁️'
         };
 
         // Full price menu for fallback
-        const priceMenu = `GERVAIS NAIL & SPA\n` +
+        const priceMenu = `GERVAIS NAIL & SPA 💅\n` +
                          `701 GERVAIS ST., SUITES 110 & 120, Columbia, SC 29201\n` +
-                         `(803) 851 - 3175. OPEN 7 DAYS A WEEK\n` +
+                         `(803) 851 - 3175. OPEN 7 DAYS A WEEK 🌟\n` +
                          `        PEDICURE (add gel polish $ 20)\n` +
-                         ` REGULAR SPA Pedicure ………… $ 40 … $35 with student ID\n` +
-                         ` HOT STONE OR CALLUS TREATMENT Pedicure … $ 40\n` +
-                         ` SIGNATURE SPA Pedicure ……… $45\n` +
-                         ` LUXURY SPA Pedicure ………… $ 55\n` +
-                         ` DELUXE SPA Pedicure ………… $65\n` +
-                         `   ** kids under 10 years old $ 25\n` +
-                         ` *** COMBO: REGULAR PEDI/ MANI: $ 65\n` +
-                         `** for student … Pedicure + gel polish manicure: $ 75\n\n` +
+                         ` REGULAR SPA Pedicure 💅 ………… $ 40 … $35 with student ID\n` +
+                         ` HOT STONE OR CALLUS TREATMENT Pedicure 🌊 … $ 40\n` +
+                         ` SIGNATURE SPA Pedicure ✨ ……… $45\n` +
+                         ` LUXURY SPA Pedicure 💎 ………… $ 55\n` +
+                         ` DELUXE SPA Pedicure 🌟 ………… $65\n` +
+                         `   ** kids under 10 years old 👶 $ 25\n` +
+                         ` *** COMBO: REGULAR PEDI/ MANI 💆‍♀️ $ 65\n` +
+                         `** for student 🎓 … Pedicure + gel polish manicure: $ 75\n\n` +
                          `                  MANICURE\n` +
-                         ` REGULAR ………… $ 30 +\n` +
-                         ` SIGNATURE ……… $ 35 +\n` +
-                         ` SHELLAC / GEL POLISH Manicure: $ 40\n\n` +
+                         ` REGULAR ………… $ 30 + 💅\n` +
+                         ` SIGNATURE ……… $ 35 + ✨\n` +
+                         ` SHELLAC / GEL POLISH Manicure 💎 $ 40\n\n` +
                          `           GEL POWDER (different shape + $ 5)\n` +
-                         ` FULL SET ………… $ 50 + / FILL …………… $ 40 +\n` +
+                         ` FULL SET ………… $ 50 + / FILL …………… $ 40 + 🌟\n` +
                          ` *** cut down extra $5\n` +
                          ` One nail fix/repair extra $5+\n` +
-                         ` SOLAR PINK: full set … $ 60 + / FILL … $ 45 +\n` +
-                         `      Ombre full set … $ 60 + / FILL $45 +\n` +
-                         `      Ombre DIP … $ 60 +\n` +
-                         `   Color powder $ 45 +\n` +
-                         ` *** DIP over lay $ 45 … Full set $ 50 +\n\n` +
+                         ` SOLAR PINK: full set … $ 60 + / FILL … $ 45 + 🌞\n` +
+                         `      Ombre full set … $ 60 + / FILL $45 + 🎨\n` +
+                         `      Ombre DIP … $ 60 + 🎨\n` +
+                         `   Color powder $ 45 + 🌈\n` +
+                         ` *** DIP over lay $ 45 … Full set $ 50 + 🌟\n\n` +
                          `       MISCELLANEOUS\n` +
                          ` Plus additional $10+ for French tip NAIL or toenails\n` +
                          ` polish change: toenail $ 20+ / gel polish $ 30 … finger $ 20+ / gel polish $ 30\n` +
                          ` polish change for kid: finger or toe $10\n` +
                          ` Nail design: $10+ … acrylic removal: $ 20+ … gel removal: $10 … dip removal $15\n\n` +
                          `      WAXING\n` +
-                         ` Eyebrows ………… $12, lips … $ 8 … chin $12 + … whole face $ 35+\n` +
-                         ` Underarms ……… $ 25 … FULL arms: $45 … HALF arms $35\n` +
-                         ` Full legs: $55 … half legs: $45\n` +
-                         ` Bikini: $ 35 / Brazilian: $ 60\n\n` +
-                         `    Eyelashes extension: $ 50 / MINK INDIVIDUAL: $ 100 +\n\n` +
+                         ` Eyebrows ………… $12 ✂️, lips … $ 8 💋, chin $12 + ✂️, whole face $ 35+ ✨\n` +
+                         ` Underarms ……… $ 25 … FULL arms: $45 … HALF arms $35 ✂️\n` +
+                         ` Full legs: $55 … half legs: $45 🌿\n` +
+                         ` Bikini: $ 35 / Brazilian: $ 60 🌺\n\n` +
+                         `    Eyelashes extension: $ 50 / MINK INDIVIDUAL: $ 100 + 👁️\n\n` +
                          `        FREE PARKING IN BACK / walk-ins welcome\n\n` +
                          `Hours: Mon-Fri 9:30 AM - 7:30 PM, Sat 9:00 AM - 7:00 PM, Sun 12:00 PM - 6:00 PM`;
 
         // Predefined responses
         const responses = {
-            'hello': "Hi! Welcome to Gervais Nail & Spa. I’m located at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Chat with us at https://dznguyen.github.io/gervais-chatbot-public/. How can I assist you today?",
-            'address': "We’re at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Free parking in the back!",
-            'phone': "Our phone number is 803-851-3175. Feel free to call us!",
-            'hours': `We’re open Mon-Fri: 9:30 AM - 7:30 PM, Sat: 9:00 AM - 7:00 PM, Sun: 12:00 PM - 6:00 PM. It’s currently ${currentTime} EDT, and we’re open until 7:00 PM today!`,
-            'price': `Here’s our full price menu from your latest text:\n\n${priceMenu}\n\nReady to book? Let me know your service and time!`,
-            'book': "Great! Please tell me the service and time (e.g., 'Signature SPA Pedicure at 2 PM tomorrow'), and I’ll confirm.",
-            'default': "Sorry, I didn’t get that. Try asking about hours, address, booking, or type 'price' for our menu. Call 803-851-3175 for more help."
+            'hello': `Hi ${userName}! Welcome to Gervais Nail & Spa. I’m located at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Please tell me your name (or type 'skip' to continue as guest) to personalize your experience, or ask about our services! Chat with us at https://dznguyen.github.io/gervais-chatbot-public/. Type 'human' for live help. 😊`,
+            'address': `We’re at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Free parking in the back, ${userName}!`,
+            'phone': `Our phone number is 803-851-3175. Feel free to call us, ${userName}!`,
+            'hours': `We’re open Mon-Fri: 9:30 AM - 7:30 PM, Sat: 9:00 AM - 7:00 PM, Sun: 12:00 PM - 6:00 PM. It’s currently ${currentTime} EDT, and we’re open until 7:00 PM today, ${userName}!`,
+            'price': `Here’s our full price menu from your latest text, ${userName}:\n\n${priceMenu}\n\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`,
+            'book': `Confirmed ${userName}! See you then. 💅✨`,
+            'human': `Thanks ${userName}! Please call 803-851-3175 or DM us on Instagram for live assistance. 😊 We’re here to help!`,
+            'default': `Sorry ${userName}, I didn’t get that. Please tell me your name (or type 'skip' to continue as guest) or try asking about hours, address, booking, or type 'price' for our menu. Type 'human' for live help, or call 803-851-3175.`
         };
 
         // Booking tracking
         let bookingRequest = null;
+
+        // Google Analytics tracking
+        function trackEvent(category, action, label) {
+            if (typeof gtag === 'function') {
+                gtag('event', action, {
+                    'event_category': category,
+                    'event_label': label
+                });
+            }
+        }
+
+        // Voice input setup
+        function startVoiceRecognition() {
+            if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+                addMessage('bot', `Sorry ${userName}, voice input isn't supported in your browser. Please type your request. 😕`);
+                return;
+            }
+
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            voiceBtn.classList.add('voice-active');
+            addMessage('bot', `Listening ${userName}... Speak now! 🎙️ (Stop by saying 'stop' or clicking the button again)`);
+
+            recognition.start();
+
+            recognition.onresult = (event) => {
+                const speechResult = event.results[0][0].transcript.toLowerCase().trim();
+                addMessage('user', speechResult);
+                simulateSubmit(speechResult);
+                trackEvent('Chatbot', 'Voice Query', speechResult);
+            };
+
+            recognition.onerror = (event) => {
+                addMessage('bot', `Error ${userName}: ${event.error}. Please try typing or check your microphone. 😕`);
+            };
+
+            recognition.onend = () => {
+                voiceBtn.classList.remove('voice-active');
+                addMessage('bot', `Stopped listening ${userName}. Use the mic button to start again! 🎙️`);
+            };
+        }
+
+        function simulateSubmit(message) {
+            inputForm.dispatchEvent(new Event('submit'));
+            userInput.value = message; // Set input for analytics tracking
+        }
+
+        voiceBtn.addEventListener('click', () => {
+            if (voiceBtn.classList.contains('voice-active')) {
+                recognition.stop();
+            } else {
+                startVoiceRecognition();
+            }
+        });
 
         inputForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -119,17 +193,43 @@
             addMessage('user', userInput.value);
             userInput.value = '';
 
+            // Track user query
+            trackEvent('Chatbot', 'User Query', message);
+
+            // Set user name from first message if it looks like a name or handle refusal
+            if (!namePrompted) {
+                namePrompted = true;
+                if (message === 'skip' || message.includes('no') || message.includes('don')) {
+                    userName = 'guest';
+                    addMessage('bot', `Alright ${userName}! I'm the Gervais Nail & Spa chatbot. How can I assist you today?`);
+                    trackEvent('Chatbot', 'Name Refusal', 'Skipped');
+                    return;
+                }
+                const nameMatch = message.match(/^[a-z]+/i);
+                if (nameMatch && !message.includes('price') && !message.includes('book') && !message.match(/\b(pedicure|manicure|gel powder|waxing|eyelashes|regular|signature|luxury|deluxe|hot stone|callus|combo|student|full set|solar pink|ombre|color|dip|eyebrows|lips|chin|whole face|underarms|full legs|bikini|brazilian)\b/i)) {
+                    userName = nameMatch[0];
+                    addMessage('bot', `Nice to meet you, ${userName}! I'm the Gervais Nail & Spa chatbot. How can I assist you today?`);
+                    trackEvent('Chatbot', 'Name Provided', userName);
+                    return;
+                }
+            }
+
             // Handle booking requests
             if (message.includes('book') || message.includes('schedule')) {
                 bookingRequest = message;
-                addMessage('bot', "Confirmed. You can also book at https://gervaisnailmedspa.glossgenius.com/ See you at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201.");
+                addMessage('bot', `Confirmed ${userName}! See you then. 💅✨`);
+                trackEvent('Chatbot', 'Booking Request', message);
             } else if (message === 'yes' && bookingRequest) {
-                addMessage('bot', "Confirmed. You can also book at https://gervaisnailmedspa.glossgenius.com/ See you at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201.");
+                addMessage('bot', `Confirmed ${userName}! See you then. 💅✨`);
                 bookingRequest = null;
+                trackEvent('Chatbot', 'Booking Confirmation', 'Yes');
+            } else if (message === 'human') {
+                addMessage('bot', responses['human']);
+                trackEvent('Chatbot', 'Escalation Request', 'Human');
             } else {
-                // Check for specific service queries
+                // Check for specific service queries with enhanced keywords
                 let response = responses['default'];
-                const serviceKeywords = message.match(/\b(pedicure|manicure|gel powder|waxing|eyelashes|regular|signature|luxury|deluxe|hot stone|callus|combo|student|full set|solar pink|ombre|color|dip|eyebrows|lips|chin|whole face|underarms|full legs|bikini|brazilian)\b/i);
+                const serviceKeywords = message.match(/\b(pedicure|manicure|gel powder|waxing|eyelashes|regular|signature|luxury|deluxe|hot stone|callus|combo|student|full set|solar pink|ombre|color|dip|eyebrows|lips|chin|whole face|underarms|full legs|bikini|brazilian|wax price|how much wax|eyebrow wax|lip wax|price|how much|cost)\b/i);
                 if (serviceKeywords) {
                     const service = serviceKeywords[0].toLowerCase();
                     switch (service) {
@@ -142,10 +242,12 @@
                         case 'callus':
                         case 'combo':
                         case 'student':
-                            response = `Pedicure prices:\n${servicePrices['regular spa pedicure']}\n${servicePrices['hot stone or callus treatment pedicure']}\n${servicePrices['signature spa pedicure']}\n${servicePrices['luxury spa pedicure']}\n${servicePrices['deluxe spa pedicure']}\n${servicePrices['kids under 10 years old']}\n${servicePrices['combo regular pedi/mani']}\n${servicePrices['student pedicure + gel polish manicure']}\nReady to book? Let me know your time!`;
+                            response = `Pedicure prices ${userName}:\n${servicePrices['regular spa pedicure']}\n${servicePrices['hot stone or callus treatment pedicure']}\n${servicePrices['signature spa pedicure']}\n${servicePrices['luxury spa pedicure']}\n${servicePrices['deluxe spa pedicure']}\n${servicePrices['kids under 10 years old']}\n${servicePrices['combo regular pedi/mani']}\n${servicePrices['student pedicure + gel polish manicure']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            trackEvent('Chatbot', 'Service Response', 'Pedicure');
                             break;
                         case 'manicure':
-                            response = `Manicure prices:\n${servicePrices['regular manicure']}\n${servicePrices['signature manicure']}\n${servicePrices['shellac/gel polish manicure']}\nReady to book? Let me know your time!`;
+                            response = `Manicure prices ${userName}:\n${servicePrices['regular manicure']}\n${servicePrices['signature manicure']}\n${servicePrices['shellac/gel polish manicure']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            trackEvent('Chatbot', 'Service Response', 'Manicure');
                             break;
                         case 'gel powder':
                         case 'full set':
@@ -153,37 +255,53 @@
                         case 'ombre':
                         case 'color':
                         case 'dip':
-                            response = `Gel Powder prices:\n${servicePrices['full set gel powder']}\n${servicePrices['solar pink full set']}\n${servicePrices['ombre full set']}\n${servicePrices['ombre dip']}\n${servicePrices['color powder']}\n${servicePrices['dip overlay']}\nReady to book? Let me know your time!`;
+                            response = `Gel Powder prices ${userName}:\n${servicePrices['full set gel powder']}\n${servicePrices['solar pink full set']}\n${servicePrices['ombre full set']}\n${servicePrices['ombre dip']}\n${servicePrices['color powder']}\n${servicePrices['dip overlay']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            trackEvent('Chatbot', 'Service Response', 'Gel Powder');
                             break;
                         case 'waxing':
                         case 'underarms':
                         case 'full legs':
                         case 'bikini':
                         case 'brazilian':
-                            response = `Waxing prices:\n${servicePrices['underarms waxing']}\n${servicePrices['full legs waxing']}\n${servicePrices['bikini waxing']}\nReady to book? Let me know your time!`;
+                        case 'how much wax':
+                        case 'wax price':
+                            response = `Waxing prices ${userName}:\n${servicePrices['underarms waxing']}\n${servicePrices['full legs waxing']}\n${servicePrices['bikini waxing']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            trackEvent('Chatbot', 'Service Response', 'Waxing');
                             break;
                         case 'eyebrows':
-                            response = `Waxing price:\n${servicePrices['eyebrows waxing']}\nReady to book? Let me know your time!`;
+                        case 'eyebrow wax':
+                            response = `Waxing price ${userName}:\n${servicePrices['eyebrows waxing']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            trackEvent('Chatbot', 'Service Response', 'Eyebrows');
                             break;
                         case 'lips':
-                            response = `Waxing price:\n${servicePrices['lips']}\nReady to book? Let me know your time!`;
+                        case 'lip wax':
+                            response = `Waxing price ${userName}:\n${servicePrices['lips']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            trackEvent('Chatbot', 'Service Response', 'Lips');
                             break;
                         case 'chin':
-                            response = `Waxing price:\n${servicePrices['chin']}\nReady to book? Let me know your time!`;
+                            response = `Waxing price ${userName}:\n${servicePrices['chin']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             break;
                         case 'whole face':
-                            response = `Waxing price:\n${servicePrices['whole face']}\nReady to book? Let me know your time!`;
+                            response = `Waxing price ${userName}:\n${servicePrices['whole face']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            trackEvent('Chatbot', 'Service Response', 'Whole Face');
                             break;
                         case 'eyelashes':
-                            response = `Eyelashes prices:\n${servicePrices['eyelashes extension']}\nReady to book? Let me know your time!`;
+                            response = `Eyelashes prices ${userName}:\n${servicePrices['eyelashes extension']}\nReady to book? Please call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            trackEvent('Chatbot', 'Service Response', 'Eyelashes');
+                            break;
+                        case 'price':
+                        case 'how much':
+                        case 'cost':
+                            response = responses['price'];
+                            trackEvent('Chatbot', 'Price Menu Request', 'Full Menu');
                             break;
                     }
-                } else if (message.includes('price') || message.includes('cost') || message.includes('how much') || message.includes('menu')) {
-                    response = responses['price'];
                 } else if (message.includes('address') || message.includes('where') || message.includes('location')) {
                     response = responses['address'];
+                    trackEvent('Chatbot', 'Address Request', 'Location');
                 } else {
                     response = responses[Object.keys(responses).find(key => message.includes(key)) || 'default'];
+                    trackEvent('Chatbot', 'Default Response', message);
                 }
                 addMessage('bot', response);
             }
@@ -198,7 +316,7 @@
         }
 
         // Initial welcome message
-        addMessage('bot', `Hi! I’m the Gervais Nail & Spa chatbot. It’s ${currentTime} EDT, and we’re open until 7:00 PM today at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Chat with us at https://dznguyen.github.io/gervais-chatbot-public/. How can I assist you today?`);
+        addMessage('bot', `Hi ${userName}! I’m the Gervais Nail & Spa chatbot. It’s ${currentTime} EDT, and we’re open until 7:00 PM today at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Please tell me your name (or type 'skip' to continue as guest) to personalize your experience, or ask about our services! Chat with us at https://dznguyen.github.io/gervais-chatbot-public/. Type 'human' for live help. 😊`);
     </script>
 </body>
 </html>
