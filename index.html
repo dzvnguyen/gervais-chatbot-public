@@ -43,7 +43,9 @@
         let userName = 'friend'; // Default name, updated by first message
         let namePrompted = false; // Track if name prompt has been sent
         let recognition = null; // Speech recognition instance
+
         const currentTime = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true, day: 'numeric', month: 'long', year: 'numeric' });
+
         // Get closing time based on day of week
         function getClosingTime() {
             const now = new Date();
@@ -52,7 +54,9 @@
             if (day === 6) return '7:00 PM'; // Saturday
             return '7:30 PM'; // Mon-Fri
         }
+
         const closingTime = getClosingTime();
+
         // Service price dictionary based on your menu
         const servicePrices = {
             'regular spa pedicure': 'REGULAR SPA Pedicure 💅 ………… $ 40 … $35 with student ID',
@@ -81,45 +85,47 @@
             'bikini waxing': 'Bikini: $ 35 / Brazilian: $ 60 🌺',
             'eyelashes extension': 'Eyelashes extension: $ 50 / MINK INDIVIDUAL: $ 100 + 👁️'
         };
+
         // Full price menu for fallback
         const priceMenu = `GERVAIS NAIL & SPA 💅\n` +
                          `701 GERVAIS ST., SUITES 110 & 120, Columbia, SC 29201\n` +
                          `(803) 851 - 3175. OPEN 7 DAYS A WEEK 🌟\n` +
-                         ` PEDICURE (add gel polish $ 20)\n` +
+                         `        PEDICURE (add gel polish $ 20)\n` +
                          ` REGULAR SPA Pedicure 💅 ………… $ 40 … $35 with student ID\n` +
                          ` HOT STONE OR CALLUS TREATMENT Pedicure 🌊 … $ 40\n` +
                          ` SIGNATURE SPA Pedicure ✨ ……… $45\n` +
                          ` LUXURY SPA Pedicure 💎 ………… $ 55\n` +
                          ` DELUXE SPA Pedicure 🌟 ………… $65\n` +
-                         ` ** kids under 10 years old 👶 $ 25\n` +
+                         `   ** kids under 10 years old 👶 $ 25\n` +
                          ` *** COMBO: REGULAR PEDI/ MANI 💆‍♀️ $ 65\n` +
                          `** for student 🎓 … Pedicure + gel polish manicure: $ 75\n\n` +
-                         ` MANICURE\n` +
+                         `                  MANICURE\n` +
                          ` REGULAR ………… $ 30 + 💅\n` +
                          ` SIGNATURE ……… $ 35 + ✨\n` +
                          ` SHELLAC / GEL POLISH Manicure 💎 $ 40\n\n` +
-                         ` GEL POWDER (different shape + $ 5)\n` +
+                         `           GEL POWDER (different shape + $ 5)\n` +
                          ` FULL SET ………… $ 50 + / FILL …………… $ 40 + 🌟\n` +
                          ` *** cut down extra $5\n` +
                          ` One nail fix/repair extra $5+\n` +
                          ` SOLAR PINK: full set … $ 60 + / FILL … $ 45 + 🌞\n` +
-                         ` Ombre full set … $ 60 + / FILL $45 + 🎨\n` +
-                         ` Ombre DIP … $ 60 + 🎨\n` +
-                         ` Color powder $ 45 + 🌈\n` +
+                         `      Ombre full set … $ 60 + / FILL $45 + 🎨\n` +
+                         `      Ombre DIP … $ 60 + 🎨\n` +
+                         `   Color powder $ 45 + 🌈\n` +
                          ` *** DIP over lay $ 45 … Full set $ 50 + 🌟\n\n` +
-                         ` MISCELLANEOUS\n` +
+                         `       MISCELLANEOUS\n` +
                          ` Plus additional $10+ for French tip NAIL or toenails\n` +
                          ` polish change: toenail $ 20+ / gel polish $ 30 … finger $ 20+ / gel polish $ 30\n` +
                          ` polish change for kid: finger or toe $10\n` +
                          ` Nail design: $10+ … acrylic removal: $ 20+ … gel removal: $10 … dip removal $15\n\n` +
-                         ` WAXING\n` +
+                         `      WAXING\n` +
                          ` Eyebrows ………… $12 ✂️, lips … $ 8 💋, chin $12 + ✂️, whole face $ 35+ ✨\n` +
                          ` Underarms ……… $ 25 … FULL arms: $45 … HALF arms $35 ✂️\n` +
                          ` Full legs: $55 … half legs: $45 🌿\n` +
                          ` Bikini: $ 35 / Brazilian: $ 60 🌺\n\n` +
-                         ` Eyelashes extension: $ 50 / MINK INDIVIDUAL: $ 100 + 👁️\n\n` +
-                         ` FREE PARKING IN BACK / walk-ins welcome\n\n` +
+                         `    Eyelashes extension: $ 50 / MINK INDIVIDUAL: $ 100 + 👁️\n\n` +
+                         `        FREE PARKING IN BACK / walk-ins welcome\n\n` +
                          `Hours: Mon-Fri 9:30 AM - 7:30 PM, Sat 9:00 AM - 7:00 PM, Sun 12:00 PM - 6:00 PM`;
+
         // Predefined responses
         const responses = {
             'hello': `Hi ${userName}! Welcome to Gervais Nail & Spa. I’m located at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Please tell me your name (or type 'skip' to continue as guest) to personalize your experience, or ask about our services! Chat with us at https://dznguyen.github.io/gervais-chatbot-public/. Type 'human' for live help. 😊`,
@@ -131,8 +137,10 @@
             'human': `Thanks ${userName}! Please call 803-851-3175 or DM us on Instagram for live assistance. 😊 We’re here to help!`,
             'default': `Sorry ${userName}, I didn’t get that. Please tell me your name (or type 'skip' to continue as guest) or try asking about hours, address, booking, or type 'price' for our menu. Book now or call 803-851-3175 to confirm, and type 'human' for live help.`
         };
+
         // Booking tracking
         let bookingRequest = null;
+
         // Google Analytics tracking
         function trackEvent(category, action, label) {
             if (typeof gtag === 'function') {
@@ -142,35 +150,25 @@
                 });
             }
         }
-        // Extract name from message
-        function extractName(message) {
-            const patterns = [
-                /(?i)my name is\s+([a-zA-Z\s]+)/,
-                /(?i)i'm\s+([a-zA-Z\s]+)/,
-                /(?i)call me\s+([a-zA-Z\s]+)/
-            ];
-            for (let pattern of patterns) {
-                let match = message.match(pattern);
-                if (match) {
-                    return match[1].trim().replace(/\s+/g, ' ').split(' ')[0]; // Take first name only for simplicity
-                }
-            }
-            return null;
-        }
+
         // Voice input setup
         function startVoiceRecognition() {
             if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
                 addMessage('bot', `Sorry ${userName}, voice input isn't supported in your browser. Please type your request. 😕`);
                 return;
             }
+
             recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             recognition.lang = 'en-US';
             recognition.interimResults = true; // Real-time updates
             recognition.continuous = true; // Continuous listening
             recognition.maxAlternatives = 1;
+
             voiceBtn.classList.add('voice-active');
             addMessage('bot', `Listening ${userName}... Speak now! 🎙️ (Stop by saying 'stop' or clicking the button again)`);
+
             recognition.start();
+
             recognition.onresult = (event) => {
                 const speechResult = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
                 addMessage('user', speechResult);
@@ -179,16 +177,20 @@
                 simulateSubmit(speechResult);
                 trackEvent('Chatbot', 'Voice Query', speechResult);
             };
+
             recognition.onerror = (event) => {
                 addMessage('bot', `Error ${userName}: ${event.error}. Please try typing or check your microphone. 😕`);
             };
+
             recognition.onend = () => {
                 voiceBtn.classList.remove('voice-active');
                 addMessage('bot', `Stopped listening ${userName}. Use the mic button to start again! 🎙️`);
             };
+
             // Stop after 2 seconds if no further input
             setTimeout(() => recognition.stop(), 2000);
         }
+
         function simulateSubmit(message) {
             // Ensure message is processed as a valid input
             if (message) {
@@ -196,6 +198,7 @@
                 userInput.value = message; // Set for analytics and processing
             }
         }
+
         voiceBtn.addEventListener('click', () => {
             if (voiceBtn.classList.contains('voice-active')) {
                 recognition.stop();
@@ -203,29 +206,33 @@
                 startVoiceRecognition();
             }
         });
+
         inputForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const message = userInput.value.trim();
-            addMessage('user', message);
+            const message = userInput.value.toLowerCase().trim();
+            addMessage('user', userInput.value);
             userInput.value = '';
+
+            // Track user query
             trackEvent('Chatbot', 'User Query', message);
+
             // Set user name from first message if it looks like a name or handle refusal
             if (!namePrompted) {
                 namePrompted = true;
-                if (message.toLowerCase() === 'skip' || message.toLowerCase().includes('no') || message.toLowerCase().includes('don')) {
+                if (message === 'skip' || message.includes('no') || message.includes('don')) {
                     userName = 'guest';
                     addMessage('bot', `Alright ${userName}! I'm the Gervais Nail & Spa chatbot. How can I assist you today?`);
                     trackEvent('Chatbot', 'Name Refusal', 'Skipped');
                     return;
                 }
-                const name = extractName(message);
-                if (name) {
-                    userName = name;
+                const nameMatch = message.match(/^[a-z]+/i);
+                if (nameMatch) {
+                    userName = nameMatch[0];
                     console.log('Detected name:', userName); // Debug log
                     addMessage('bot', `Nice to meet you, ${userName}! I'm the Gervais Nail & Spa chatbot. How can I assist you today?`);
                     trackEvent('Chatbot', 'Name Provided', userName);
                     // Reprocess the remaining message if it contains a query
-                    const remainingMessage = message.replace(name, '').trim();
+                    const remainingMessage = message.replace(nameMatch[0], '').trim();
                     if (remainingMessage) {
                         userInput.value = remainingMessage;
                         inputForm.dispatchEvent(new Event('submit'));
@@ -233,6 +240,7 @@
                     return;
                 }
             }
+
             // Handle booking requests
             if (message.includes('book') || message.includes('schedule')) {
                 bookingRequest = message;
@@ -323,6 +331,7 @@
                 addMessage('bot', response);
             }
         });
+
         function addMessage(type, text) {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', type === 'user' ? 'user-message' : 'bot-message');
@@ -330,6 +339,7 @@
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
+
         // Initial welcome message
         addMessage('bot', `Hi ${userName}! I’m the Gervais Nail & Spa chatbot. It’s ${currentTime} EDT, and we’re open until ${closingTime} today at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Please tell me your name (or type 'skip' to continue as guest) to personalize your experience, or ask about our services! Chat with us at https://dznguyen.github.io/gervais-chatbot-public/. Type 'human' for live help. 😊`);
     </script>
