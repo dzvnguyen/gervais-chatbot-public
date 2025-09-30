@@ -19,30 +19,24 @@
         .message { margin: 10px 0; padding: 10px; border-radius: 5px; max-width: 70%; white-space: pre-wrap; }
         .user-message { background: #007bff; color: white; margin-left: 30%; }
         .bot-message { background: #e9ecef; color: black; margin-right: 30%; }
-        #input-form { display: flex; padding: 10px; align-items: center; }
+        #input-form { display: flex; padding: 10px; }
         #user-input { flex: 1; padding: 5px; border: 1px solid #ddd; border-radius: 5px 0 0 5px; }
         #send-btn { padding: 5px 10px; border: 1px solid #007bff; border-left: none; border-radius: 0 5px 5px 0; background: #007bff; color: white; cursor: pointer; }
-        #voice-btn { padding: 5px 10px; margin-left: 5px; background: #ff4444; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .voice-active { background: #ff6666; }
     </style>
 </head>
 <body>
     <div id="chatbox">
         <div id="chat-messages"></div>
         <form id="input-form">
-            <input type="text" id="user-input" placeholder="Type your name or a question...">
+            <input type="text" id="user-input" placeholder="Type a question...">
             <button type="submit" id="send-btn">Send</button>
-            <button type="button" id="voice-btn">🎙️ Voice</button>
         </form>
     </div>
     <script>
         const chatMessages = document.getElementById('chat-messages');
         const userInput = document.getElementById('user-input');
         const inputForm = document.getElementById('input-form');
-        const voiceBtn = document.getElementById('voice-btn');
-        let userName = 'friend'; // Default name, updated by first message
-        let namePrompted = false; // Track if name prompt has been sent
-        let recognition = null; // Speech recognition instance
+        let userName = 'guest'; // Default greeting, no personalization
 
         const currentTime = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true, day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -128,14 +122,14 @@
 
         // Predefined responses
         const responses = {
-            'hello': `Hi ${userName}! Welcome to Gervais Nail & Spa. I’m located at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Please tell me your name (or type 'skip' to continue as guest) to personalize your experience, or ask about our services! Chat with us at https://dznguyen.github.io/gervais-chatbot-public/. Type 'human' for live help. 😊`,
-            'address': `We’re at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Free parking in the back, ${userName}!`,
-            'phone': `Our phone number is 803-851-3175. Feel free to call us, ${userName}!`,
-            'hours': `We’re open Mon-Fri: 9:30 AM - 7:30 PM, Sat: 9:00 AM - 7:00 PM, Sun: 12:00 PM - 6:00 PM. It’s currently ${currentTime} EDT, and we’re open until ${closingTime} today, ${userName}!`,
-            'price': `Here’s our full price menu from your latest text, ${userName}:\n\n${priceMenu}\n\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`,
-            'book': `Confirmed ${userName}! See you then. 💅✨`,
-            'human': `Thanks ${userName}! Please call 803-851-3175 or DM us on Instagram for live assistance. 😊 We’re here to help!`,
-            'default': `Sorry ${userName}, I didn’t get that. Please tell me your name (or type 'skip' to continue as guest) or try asking about hours, address, booking, or type 'price' for our menu. Book now or call 803-851-3175 to confirm, and type 'human' for live help.`
+            'hello': `Hi! Welcome to Gervais Nail & Spa. I’m located at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Ask about our services! Chat with us at https://dznguyen.github.io/gervais-chatbot-public/. Type 'human' for live help. 😊`,
+            'address': `We’re at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Free parking in the back!`,
+            'phone': `Our phone number is 803-851-3175. Feel free to call us!`,
+            'hours': `We’re open Mon-Fri: 9:30 AM - 7:30 PM, Sat: 9:00 AM - 7:00 PM, Sun: 12:00 PM - 6:00 PM. It’s currently ${currentTime} EDT, and we’re open until ${closingTime} today!`,
+            'price': `Here’s our full price menu:\n\n${priceMenu}\n\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`,
+            'book': `Confirmed! See you then. 💅✨`,
+            'human': `Thanks! Please call 803-851-3175 or DM us on Instagram for live assistance. 😊 We’re here to help!`,
+            'default': `Sorry, I didn’t get that. Try asking about hours, address, booking, or type 'price' for our menu. Book now or call 803-851-3175 to confirm, and type 'human' for live help.`
         };
 
         // Booking tracking
@@ -151,62 +145,6 @@
             }
         }
 
-        // Voice input setup
-        function startVoiceRecognition() {
-            if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-                addMessage('bot', `Sorry ${userName}, voice input isn't supported in your browser. Please type your request. 😕`);
-                return;
-            }
-
-            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'en-US';
-            recognition.interimResults = true; // Real-time updates
-            recognition.continuous = true; // Continuous listening
-            recognition.maxAlternatives = 1;
-
-            voiceBtn.classList.add('voice-active');
-            addMessage('bot', `Listening ${userName}... Speak now! 🎙️ (Stop by saying 'stop' or clicking the button again)`);
-
-            recognition.start();
-
-            recognition.onresult = (event) => {
-                const speechResult = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
-                addMessage('user', speechResult);
-                // Debug log to check transcription
-                console.log('Transcribed:', speechResult);
-                simulateSubmit(speechResult);
-                trackEvent('Chatbot', 'Voice Query', speechResult);
-            };
-
-            recognition.onerror = (event) => {
-                addMessage('bot', `Error ${userName}: ${event.error}. Please try typing or check your microphone. 😕`);
-            };
-
-            recognition.onend = () => {
-                voiceBtn.classList.remove('voice-active');
-                addMessage('bot', `Stopped listening ${userName}. Use the mic button to start again! 🎙️`);
-            };
-
-            // Stop after 2 seconds if no further input
-            setTimeout(() => recognition.stop(), 2000);
-        }
-
-        function simulateSubmit(message) {
-            // Ensure message is processed as a valid input
-            if (message) {
-                inputForm.dispatchEvent(new Event('submit'));
-                userInput.value = message; // Set for analytics and processing
-            }
-        }
-
-        voiceBtn.addEventListener('click', () => {
-            if (voiceBtn.classList.contains('voice-active')) {
-                recognition.stop();
-            } else {
-                startVoiceRecognition();
-            }
-        });
-
         inputForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const message = userInput.value.toLowerCase().trim();
@@ -216,38 +154,13 @@
             // Track user query
             trackEvent('Chatbot', 'User Query', message);
 
-            // Set user name from first message if it looks like a name or handle refusal
-            if (!namePrompted) {
-                namePrompted = true;
-                if (message === 'skip' || message.includes('no') || message.includes('don')) {
-                    userName = 'guest';
-                    addMessage('bot', `Alright ${userName}! I'm the Gervais Nail & Spa chatbot. How can I assist you today?`);
-                    trackEvent('Chatbot', 'Name Refusal', 'Skipped');
-                    return;
-                }
-                const nameMatch = message.match(/^[a-z]+/i);
-                if (nameMatch) {
-                    userName = nameMatch[0];
-                    console.log('Detected name:', userName); // Debug log
-                    addMessage('bot', `Nice to meet you, ${userName}! I'm the Gervais Nail & Spa chatbot. How can I assist you today?`);
-                    trackEvent('Chatbot', 'Name Provided', userName);
-                    // Reprocess the remaining message if it contains a query
-                    const remainingMessage = message.replace(nameMatch[0], '').trim();
-                    if (remainingMessage) {
-                        userInput.value = remainingMessage;
-                        inputForm.dispatchEvent(new Event('submit'));
-                    }
-                    return;
-                }
-            }
-
             // Handle booking requests
             if (message.includes('book') || message.includes('schedule')) {
                 bookingRequest = message;
-                addMessage('bot', `Confirmed ${userName}! See you then. 💅✨`);
+                addMessage('bot', `Confirmed! See you then. 💅✨`);
                 trackEvent('Chatbot', 'Booking Request', message);
             } else if (message === 'yes' && bookingRequest) {
-                addMessage('bot', `Confirmed ${userName}! See you then. 💅✨`);
+                addMessage('bot', `Confirmed! See you then. 💅✨`);
                 bookingRequest = null;
                 trackEvent('Chatbot', 'Booking Confirmation', 'Yes');
             } else if (message === 'human') {
@@ -270,11 +183,11 @@
                         case 'callus':
                         case 'combo':
                         case 'student':
-                            response = `Pedicure prices ${userName}:\n${servicePrices['regular spa pedicure']}\n${servicePrices['hot stone or callus treatment pedicure']}\n${servicePrices['signature spa pedicure']}\n${servicePrices['luxury spa pedicure']}\n${servicePrices['deluxe spa pedicure']}\n${servicePrices['kids under 10 years old']}\n${servicePrices['combo regular pedi/mani']}\n${servicePrices['student pedicure + gel polish manicure']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Pedicure prices:\n${servicePrices['regular spa pedicure']}\n${servicePrices['hot stone or callus treatment pedicure']}\n${servicePrices['signature spa pedicure']}\n${servicePrices['luxury spa pedicure']}\n${servicePrices['deluxe spa pedicure']}\n${servicePrices['kids under 10 years old']}\n${servicePrices['combo regular pedi/mani']}\n${servicePrices['student pedicure + gel polish manicure']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Pedicure');
                             break;
                         case 'manicure':
-                            response = `Manicure prices ${userName}:\n${servicePrices['regular manicure']}\n${servicePrices['signature manicure']}\n${servicePrices['shellac/gel polish manicure']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Manicure prices:\n${servicePrices['regular manicure']}\n${servicePrices['signature manicure']}\n${servicePrices['shellac/gel polish manicure']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Manicure');
                             break;
                         case 'gel powder':
@@ -283,7 +196,7 @@
                         case 'ombre':
                         case 'color':
                         case 'dip':
-                            response = `Gel Powder prices ${userName}:\n${servicePrices['full set gel powder']}\n${servicePrices['solar pink full set']}\n${servicePrices['ombre full set']}\n${servicePrices['ombre dip']}\n${servicePrices['color powder']}\n${servicePrices['dip overlay']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Gel Powder prices:\n${servicePrices['full set gel powder']}\n${servicePrices['solar pink full set']}\n${servicePrices['ombre full set']}\n${servicePrices['ombre dip']}\n${servicePrices['color powder']}\n${servicePrices['dip overlay']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Gel Powder');
                             break;
                         case 'waxing':
@@ -293,28 +206,28 @@
                         case 'brazilian':
                         case 'how much wax':
                         case 'wax price':
-                            response = `Waxing prices ${userName}:\n${servicePrices['underarms waxing']}\n${servicePrices['full legs waxing']}\n${servicePrices['bikini waxing']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Waxing prices:\n${servicePrices['underarms waxing']}\n${servicePrices['full legs waxing']}\n${servicePrices['bikini waxing']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Waxing');
                             break;
                         case 'eyebrows':
                         case 'eyebrow wax':
-                            response = `Waxing price ${userName}:\n${servicePrices['eyebrows waxing']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Waxing price:\n${servicePrices['eyebrows waxing']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Eyebrows');
                             break;
                         case 'lips':
                         case 'lip wax':
-                            response = `Waxing price ${userName}:\n${servicePrices['lips']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Waxing price:\n${servicePrices['lips']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Lips');
                             break;
                         case 'chin':
-                            response = `Waxing price ${userName}:\n${servicePrices['chin']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Waxing price:\n${servicePrices['chin']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             break;
                         case 'whole face':
-                            response = `Waxing price ${userName}:\n${servicePrices['whole face']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Waxing price:\n${servicePrices['whole face']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Whole Face');
                             break;
                         case 'eyelashes':
-                            response = `Eyelashes prices ${userName}:\n${servicePrices['eyelashes extension']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
+                            response = `Eyelashes prices:\n${servicePrices['eyelashes extension']}\nBook now or call 803-851-3175 to confirm with our team, as availability varies. Type 'human' for live help. 😊`;
                             trackEvent('Chatbot', 'Service Response', 'Eyelashes');
                             break;
                     }
@@ -341,7 +254,7 @@
         }
 
         // Initial welcome message
-        addMessage('bot', `Hi ${userName}! I’m the Gervais Nail & Spa chatbot. It’s ${currentTime} EDT, and we’re open until ${closingTime} today at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Please tell me your name (or type 'skip' to continue as guest) to personalize your experience, or ask about our services! Chat with us at https://dznguyen.github.io/gervais-chatbot-public/. Type 'human' for live help. 😊`);
+        addMessage('bot', `Hi! I’m the Gervais Nail & Spa chatbot. It’s ${currentTime} EDT, and we’re open until ${closingTime} today at 701 Gervais St., Suites 110 & 120, Columbia, SC 29201. Ask about our services! Chat with us at https://dznguyen.github.io/gervais-chatbot-public/. Type 'human' for live help. 😊`);
     </script>
 </body>
 </html>
